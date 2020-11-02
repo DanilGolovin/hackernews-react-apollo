@@ -13,6 +13,9 @@ import { getMainDefinition } from 'apollo-utilities'
 import { AUTH_TOKEN } from './constants'
 import './styles/index.css';
 import App from './components/App';
+import {createMuiTheme} from "@material-ui/core";
+import { ThemeProvider } from '@material-ui/styles';
+
 
 const wsLink = new WebSocketLink({
     uri: `ws://localhost:4000`,
@@ -41,10 +44,6 @@ const authLink = setContext((_, { headers }) => {
     }
 })
 
-const client = new ApolloClient({
-    link: authLink.concat(httpLink),
-    cache: new InMemoryCache()
-})
 
 const link = split(
     ({ query }) => {
@@ -55,10 +54,39 @@ const link = split(
     authLink.concat(httpLink)
 )
 
+const client = new ApolloClient({
+    link: authLink.concat(httpLink),
+    cache: new InMemoryCache()
+})
+// Material UI styles provider
+
+const theme = createMuiTheme({
+    palette: {
+        primary: {
+            main: 'rgb(255,102,0)',
+        },
+
+        secondary: {
+            main: 'rgb(246,246,239)',
+        },
+    },
+    containerWidth: {
+        maxWidth: '1500px',
+    },
+    flexRowCenter: {
+        display: 'flex',
+        justifyContent: 'center',
+        flexDirection: 'row',
+    },
+    spacing: 10,
+});
+
 ReactDOM.render(
     <BrowserRouter>
         <ApolloProvider client={client}>
-            <App />
+            <ThemeProvider theme={theme}>
+                <App />
+            </ThemeProvider>
         </ApolloProvider>
     </BrowserRouter>,
     document.getElementById('root')

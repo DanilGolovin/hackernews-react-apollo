@@ -1,86 +1,19 @@
-import React, {Component, Fragment} from 'react';
+import React from 'react';
 import { Query } from 'react-apollo'
-import gql from 'graphql-tag'
+
+import Box from "@material-ui/core/Box";
+import Button from "@material-ui/core/Button";
+import Grid from "@material-ui/core/Grid";
 
 import Link from './Link';
 import { LINKS_PER_PAGE } from '../constants'
+import {FEED_QUERY, NEW_LINKS_SUBSCRIPTION, NEW_VOTES_SUBSCRIPTION} from "../queries";
 
-export const FEED_QUERY = gql`
-    query FeedQuery($first: Int, $skip: Int, $orderBy: LinkOrderByInput) {
-        feed(first: $first, skip: $skip, orderBy: $orderBy) {
-            links {
-                id
-                createdAt
-                url
-                description
-                postedBy {
-                    id
-                    name
-                }
-                votes {
-                    id
-                    user {
-                        id
-                    }
-                }
-            }
-            count
-        }
-    }
-`
 
-const NEW_LINKS_SUBSCRIPTION = gql`
-    subscription {
-        newLink {
-            id
-            url
-            description
-            createdAt
-            postedBy {
-                id
-                name
-            }
-            votes {
-                id
-                user {
-                    id
-                }
-            }
-        }
-    }
-`
-
-const NEW_VOTES_SUBSCRIPTION = gql`
-    subscription {
-        newVote {
-            id
-            link {
-                id
-                url
-                description
-                createdAt
-                postedBy {
-                    id
-                    name
-                }
-                votes {
-                    id
-                    user {
-                        id
-                    }
-                }
-            }
-            user {
-                id
-            }
-        }
-    }
-`
-
-class LinkList extends Component {
-    _updateCacheAfterVote = (store, createVote, linkId) => {
-        const isNewPage = this.props.location.pathname.includes('new')
-        const page = parseInt(this.props.match.params.page, 10)
+const LinkList = (props) => {
+    const _updateCacheAfterVote = (store, createVote, linkId) => {
+        const isNewPage = props.location.pathname.includes('new')
+        const page = parseInt(props.match.params.page, 10)
 
         const skip = isNewPage ? (page - 1) * LINKS_PER_PAGE : 0
         const first = isNewPage ? LINKS_PER_PAGE : 100
@@ -96,7 +29,7 @@ class LinkList extends Component {
         store.writeQuery({ query: FEED_QUERY, data })
     }
 
-    _subscribeToNewLinks = subscribeToMore => {
+    const _subscribeToNewLinks = subscribeToMore => {
         subscribeToMore({
             document: NEW_LINKS_SUBSCRIPTION,
             updateQuery: (prev, { subscriptionData }) => {
@@ -116,15 +49,15 @@ class LinkList extends Component {
         })
     }
 
-    _subscribeToNewVotes = subscribeToMore => {
+    const _subscribeToNewVotes = subscribeToMore => {
         subscribeToMore({
             document: NEW_VOTES_SUBSCRIPTION
         })
     }
 
-    _getQueryVariables = () => {
-        const isNewPage = this.props.location.pathname.includes('new')
-        const page = parseInt(this.props.match.params.page, 10)
+    const _getQueryVariables = () => {
+        const isNewPage = props.location.pathname.includes('new')
+        const page = parseInt(props.match.params.page, 10)
 
         const skip = isNewPage ? (page - 1) * LINKS_PER_PAGE : 0
         const first = isNewPage ? LINKS_PER_PAGE : 100
@@ -132,8 +65,8 @@ class LinkList extends Component {
         return { first, skip, orderBy }
     }
 
-    _getLinksToRender = data => {
-        const isNewPage = this.props.location.pathname.includes('new')
+    const _getLinksToRender = data => {
+        const isNewPage = props.location.pathname.includes('new')
         if (isNewPage) {
             return data.feed.links
         }
@@ -142,64 +75,67 @@ class LinkList extends Component {
         return rankedLinks
     }
 
-    _nextPage = data => {
-        const page = parseInt(this.props.match.params.page, 10)
+    const _nextPage = data => {
+        const page = parseInt(props.match.params.page, 10)
         if (page <= data.feed.count / LINKS_PER_PAGE) {
             const nextPage = page + 1
-            this.props.history.push(`/new/${nextPage}`)
+            props.history.push(`/new/${nextPage}`)
         }
     }
 
-    _previousPage = () => {
-        const page = parseInt(this.props.match.params.page, 10)
+    const _previousPage = () => {
+        const page = parseInt(props.match.params.page, 10)
         if (page > 1) {
             const previousPage = page - 1
-            this.props.history.push(`/new/${previousPage}`)
+            props.history.push(`/new/${previousPage}`)
         }
     }
 
-    render() {
-        return (
-            <Query query={FEED_QUERY} variables={this._getQueryVariables()}>
+    return (
+        <Query query={FEED_QUERY} variables={_getQueryVariables()}>
                 {({ loading, error, data, subscribeToMore }) => {
                     if (loading) return <div>Fetching</div>
                     if (error) return <div>Error</div>
 
-                    this._subscribeToNewLinks(subscribeToMore)
-                    this._subscribeToNewVotes(subscribeToMore)
+                    _subscribeToNewLinks(subscribeToMore)
+                    _subscribeToNewVotes(subscribeToMore)
 
-                    const linksToRender = this._getLinksToRender(data)
-                    const isNewPage = this.props.location.pathname.includes('new')
-                    const pageIndex = this.props.match.params.page
-                        ? (this.props.match.params.page - 1) * LINKS_PER_PAGE
+                    const linksToRender = _getLinksToRender(data)
+                    const isNewPage = props.location.pathname.includes('new')
+                    const pageIndex = props.match.params.page
+                        ? (props.match.params.page - 1) * LINKS_PER_PAGE
                         : 0
 
                     return (
-                        <Fragment>
+                        <>
                             {linksToRender.map((link, index) => (
                                 <Link
                                     key={link.id}
                                     link={link}
                                     index={index + pageIndex}
-                                    updateStoreAfterVote={this._updateCacheAfterVote}
+                                    updateStoreAfterVote={_updateCacheAfterVote}
                                 />
                             ))}
                             {isNewPage && (
-                                <div className="flex ml4 mv3 gray">
-                                    <div className="pointer mr2" onClick={this._previousPage}>
-                                        Previous
-                                    </div>
-                                    <div className="pointer" onClick={() => this._nextPage(data)}>
-                                        Next
-                                    </div>
-                                </div>
+                                <Grid container>
+                                    <Box m={2}>
+                                        <Button variant="outlined" color="primary" onClick={_previousPage}>
+                                            Previous
+                                        </Button>
+                                    </Box>
+                                    <Box m={2}>
+                                        <Button variant="outlined" color="primary" onClick={() => _nextPage(data)}>
+                                            Next
+                                        </Button>
+                                    </Box>
+                                </Grid>
                             )}
-                        </Fragment>
+                        </>
                     )
                 }}
             </Query>
         )
-    }
+
 }
 
 export default LinkList;

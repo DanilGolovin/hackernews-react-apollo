@@ -1,65 +1,141 @@
-import React, { Component } from 'react'
+// import React, {useState} from 'react'
+// import { useQuery } from '@apollo/client';
+// import Link from './Link'
+// import TextField from "@material-ui/core/TextField";
+// import Card from "@material-ui/core/Card";
+// import Grid from "@material-ui/core/Grid";
+// import Box from "@material-ui/core/Box";
+// import makeStyles from "@material-ui/core/styles/makeStyles";
+// import Button from "@material-ui/core/Button";
+// import {FEED_SEARCH_QUERY} from "../queries";
+// import {withApollo} from "@apollo/client/react/hoc";
+//
+// const useStyles = makeStyles((theme) => ({
+//     root: {
+//         margin: theme.spacing(5, 0),
+//         display: 'flex',
+//         justifyContent: 'center',
+//     },
+//     between: {
+//         display: 'flex',
+//         justifyContent: 'space-between',
+//         width: 400,
+//     }
+// }));
+//
+// const Search = (props) => {
+//     const classes = useStyles();
+//     const [links, setLinks] = useState([])
+//     const [filter, setFilter] = useState('')
+//     const [_executeSearch, { loading, data }] = useQuery(FEED_SEARCH_QUERY, {
+//         variables: { filter },
+//     });
+//
+//     return (
+//         <Grid
+//             container
+//             direction="column"
+//         >
+//             <Card variant="outlined" className={classes.root} >
+//                 <Box p={4} className={classes.between}>
+//                     <TextField
+//                         type='text'
+//                         onChange={e => setFilter(e.target.value)}
+//                         label="Search"
+//                         variant="outlined"
+//
+//                     />
+//                     <Button
+//                         variant="contained"
+//                         color="primary"
+//                         onClick={() => _executeSearch()}
+//                     >
+//                         OK
+//                     </Button>
+//                 </Box>
+//             </Card>
+//             <Box>
+//                 {loading && 'loading...'}
+//             </Box>
+//             {
+//                 data.feed.links.map((link, index) => (
+//                     <Link key={link.id} link={link} index={index} />
+//                     )
+//                 )
+//             }
+//         </Grid>
+//     )
+// }
+//
+// export default withApollo(Search);
+
+import React, { useState } from 'react'
 import { withApollo } from 'react-apollo'
-import gql from 'graphql-tag'
 import Link from './Link'
+import TextField from "@material-ui/core/TextField";
+import Card from "@material-ui/core/Card";
+import Grid from "@material-ui/core/Grid";
+import Box from "@material-ui/core/Box";
+import makeStyles from "@material-ui/core/styles/makeStyles";
+import Button from "@material-ui/core/Button";
+import {FEED_SEARCH_QUERY} from "../queries";
 
-const FEED_SEARCH_QUERY = gql`
-    query FeedSearchQuery($filter: String!) {
-        feed(filter: $filter) {
-            links {
-                id
-                url
-                description
-                createdAt
-                postedBy {
-                    id
-                    name
-                }
-                votes {
-                    id
-                    user {
-                        id
-                    }
-                }
-            }
-        }
+const useStyles = makeStyles((theme) => ({
+    root: {
+        margin: theme.spacing(5, 0),
+        display: 'flex',
+        justifyContent: 'center',
+    },
+    between: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        width: 400,
     }
-`
+}));
 
-class Search extends Component {
+const Search = (props) => {
+    const classes = useStyles();
+    const [links, setLinks] = useState([])
+    const [filter, setFilter] = useState('')
 
-    state = {
-        links: [],
-        filter: ''
-    }
-
-    render() {
-        return (
-            <div>
-                <div>
-                    Search
-                    <input
-                        type='text'
-                        onChange={e => this.setState({ filter: e.target.value })}
-                    />
-                    <button onClick={() => this._executeSearch()}>OK</button>
-                </div>
-                {this.state.links.map((link, index) => (
-                    <Link key={link.id} link={link} index={index} />
-                ))}
-            </div>
-        )
-    }
-
-    _executeSearch = async () => {
-        const { filter } = this.state
-        const result = await this.props.client.query({
+    const _executeSearch = async () => {
+        const result = await props.client.query({
             query: FEED_SEARCH_QUERY,
             variables: { filter },
         })
-        const links = result.data.feed.links
-        this.setState({ links })
+        setLinks(result.data.feed.links)
     }
+    return (
+        <Grid
+            container
+            direction="column"
+        >
+            <Card variant="outlined" className={classes.root} >
+                <Box p={4} className={classes.between}>
+                    <TextField
+                        type='text'
+                        onChange={e => setFilter(e.target.value)}
+                        label="Search"
+                        variant="outlined"
+
+                    />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => _executeSearch()}
+                    >
+                        OK
+                    </Button>
+                </Box>
+            </Card>
+            {
+                links.map((link, index) => (
+                        <Link key={link.id} link={link} index={index} />
+                    )
+                )
+            }
+        </Grid>
+    )
 }
 
 export default withApollo(Search)
