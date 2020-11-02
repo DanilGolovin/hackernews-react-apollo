@@ -1,0 +1,13 @@
+body {
+    height: 100vh;
+}
+
+#root {
+    height: inherit;
+}
+
+.tab-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
