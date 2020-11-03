@@ -30,16 +30,16 @@ const App = () => {
     return (
         <div className={classes.pageContent}>
           <Header />
-            <Switch>
-                <div className={classes.pageWrapper}>
+            <div className={classes.pageWrapper}>
+                <Switch>
                   <Route exact path='/' render={() => <Redirect to='/new/1' />} />
                   <Route exact path="/create" component={CreateLink} />
                   <Route exact path="/login" component={Login} />
                   <Route exact path='/search' component={Search} />
                   <Route exact path='/top' component={LinkList} />
                   <Route exact path='/new/:page' component={LinkList} />
-                </div>
-            </Switch>
+                </Switch>
+            </div>
         </div>
     )
 }

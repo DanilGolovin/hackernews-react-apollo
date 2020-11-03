@@ -25,12 +25,12 @@ const CreateLink = (props) => {
                 query: FEED_QUERY,
                 data,
                 variables: { first, skip, orderBy }
-            })},
-            onCompleted() {
-                props.history.push('/new/1')
-            }
+            })
+        },
+        onCompleted() {
+            props.history.push('/new/1')
         }
-    )
+    })
 
     return (
         <Grid container justify="center" alignItems="center">

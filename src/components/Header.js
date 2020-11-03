@@ -1,9 +1,9 @@
 import React from 'react'
 import { withRouter } from 'react-router'
+
 import { AppBar, Toolbar, Typography, IconButton, Button, MenuItem, Menu } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles';
 import MoreIcon from '@material-ui/icons/MoreVert';
-
 
 import { AUTH_TOKEN } from "../constants";
 import TabLink from "./TabLink";
@@ -141,32 +141,5 @@ const Header = ({history}) => {
     )
 
 }
-
-/* <AppBar position="static">
-            <Toolbar>
-                <Typography variant="h6">
-                    Hacker News
-                </Typography>
-                <TabLink label={"new"} path={"/"} />
-                <TabLink label={"top"} path={"/top"} />
-                <TabLink label={"search"} path={"/search"} />
-                {authToken && (
-                    <TabLink label={"submit"} path={"/create"} />
-                )}
-                {authToken ? (
-                    <Button
-                        className="ml1 pointer black"
-                        onClick={() => {
-                            localStorage.removeItem(AUTH_TOKEN)
-                            this.props.history.push(`/`)
-                        }}
-                    >
-                        logout
-                    </Button>
-                ) : (
-                    <TabLink label={"login"} path={"/login"} />
-                )}
-            </Toolbar>
-        </AppBar>*/
 
 export default withRouter(Header)

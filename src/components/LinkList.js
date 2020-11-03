@@ -1,5 +1,5 @@
-import React from 'react';
-import { Query } from 'react-apollo'
+import React, {useMemo} from 'react';
+import { useQuery } from '@apollo/react-hooks'
 
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
@@ -7,7 +7,7 @@ import Grid from "@material-ui/core/Grid";
 
 import Link from './Link';
 import { LINKS_PER_PAGE } from '../constants'
-import {FEED_QUERY, NEW_LINKS_SUBSCRIPTION, NEW_VOTES_SUBSCRIPTION} from "../queries";
+import { FEED_QUERY, NEW_LINKS_SUBSCRIPTION, NEW_VOTES_SUBSCRIPTION } from "../queries";
 
 
 const LinkList = (props) => {
@@ -33,9 +33,10 @@ const LinkList = (props) => {
         subscribeToMore({
             document: NEW_LINKS_SUBSCRIPTION,
             updateQuery: (prev, { subscriptionData }) => {
-                if (!subscriptionData.data) return prev
+                if (!subscriptionData.data && !subscriptionData.data.newLink) return prev
                 const newLink = subscriptionData.data.newLink
-                const exists = prev.feed.links.find(({ id }) => id === newLink.id);
+
+                const exists = prev.feed.links.find(( id ) => id === newLink.id)
                 if (exists) return prev;
 
                 return Object.assign({}, prev, {
@@ -55,7 +56,7 @@ const LinkList = (props) => {
         })
     }
 
-    const _getQueryVariables = () => {
+    function _getQueryVariables() {
         const isNewPage = props.location.pathname.includes('new')
         const page = parseInt(props.match.params.page, 10)
 
@@ -66,12 +67,14 @@ const LinkList = (props) => {
     }
 
     const _getLinksToRender = data => {
+       // console.log('data: ', data)
         const isNewPage = props.location.pathname.includes('new')
         if (isNewPage) {
             return data.feed.links
         }
         const rankedLinks = data.feed.links.slice()
         rankedLinks.sort((l1, l2) => l2.votes.length - l1.votes.length)
+       // console.log('rankedLinks', rankedLinks)
         return rankedLinks
     }
 
@@ -91,51 +94,51 @@ const LinkList = (props) => {
         }
     }
 
+    const variables = useMemo(() => _getQueryVariables(), [_getQueryVariables ]);
+
+    const { loading, error, data, subscribeToMore } = useQuery(FEED_QUERY,{variables})
+   // console.log(data)
+    let content, isNewPage, pageIndex;
+    if (error) content = error;
+    else if (loading) content = 'loading...';
+    if (!loading) {
+        const linksToRender = _getLinksToRender(data)
+         isNewPage = props.location.pathname.includes('new')
+         pageIndex = props.match.params.page
+             ? (props.match.params.page - 1) * LINKS_PER_PAGE
+             : 0
+
+        content = linksToRender.map((link, index) => (
+            <Link
+                key={link.id}
+                link={link}
+                index={index + pageIndex}
+                updateStoreAfterVote={_updateCacheAfterVote}
+            />
+            ))
+        _subscribeToNewLinks(subscribeToMore)
+        _subscribeToNewVotes(subscribeToMore)
+    }
+
     return (
-        <Query query={FEED_QUERY} variables={_getQueryVariables()}>
-                {({ loading, error, data, subscribeToMore }) => {
-                    if (loading) return <div>Fetching</div>
-                    if (error) return <div>Error</div>
-
-                    _subscribeToNewLinks(subscribeToMore)
-                    _subscribeToNewVotes(subscribeToMore)
-
-                    const linksToRender = _getLinksToRender(data)
-                    const isNewPage = props.location.pathname.includes('new')
-                    const pageIndex = props.match.params.page
-                        ? (props.match.params.page - 1) * LINKS_PER_PAGE
-                        : 0
-
-                    return (
-                        <>
-                            {linksToRender.map((link, index) => (
-                                <Link
-                                    key={link.id}
-                                    link={link}
-                                    index={index + pageIndex}
-                                    updateStoreAfterVote={_updateCacheAfterVote}
-                                />
-                            ))}
-                            {isNewPage && (
-                                <Grid container>
-                                    <Box m={2}>
-                                        <Button variant="outlined" color="primary" onClick={_previousPage}>
-                                            Previous
-                                        </Button>
-                                    </Box>
-                                    <Box m={2}>
-                                        <Button variant="outlined" color="primary" onClick={() => _nextPage(data)}>
-                                            Next
-                                        </Button>
-                                    </Box>
-                                </Grid>
-                            )}
-                        </>
-                    )
-                }}
-            </Query>
-        )
-
+        <>
+            {content}
+            {isNewPage && (
+                <Grid container>
+                    <Box m={2}>
+                        <Button variant="outlined" color="primary" onClick={_previousPage}>
+                            Previous
+                        </Button>
+                    </Box>
+                    <Box m={2}>
+                        <Button variant="outlined" color="primary" onClick={() => _nextPage(data)}>
+                            Next
+                        </Button>
+                    </Box>
+                </Grid>
+            )}
+        </>
+    )
 }
 
 export default LinkList;
