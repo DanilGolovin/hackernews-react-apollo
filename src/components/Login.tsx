@@ -1,25 +1,45 @@
 import React, { useState } from 'react'
+import { useHistory } from "react-router";
+
 import { useMutation } from '@apollo/react-hooks';
+
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
-import { Paper, Grid, TextField, Button } from '@material-ui/core';
+import { Paper, Grid, Button } from '@material-ui/core';
+import TextField from '@material-ui/core/TextField';
 
 import { AUTH_TOKEN } from '../constants'
 import { LOGIN_MUTATION, SIGNUP_MUTATION } from "../queries";
 
-const Login = (props) => {
-    const [login, setLogin] = useState(true)
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [name, setName] = useState('')
 
-    const _confirm = async data => {
+const INITIAL_STATE = {
+    email: '',
+    password: '',
+    name: '',
+}
+
+type data = {
+    login: {
+        token: string
+    },
+    signup:  {
+        token: string
+    },
+}
+
+const Login = () => {
+    const history = useHistory();
+
+    const [login, setLogin] = useState(true)
+    const [loginState, setLoginState] = useState(INITIAL_STATE)
+
+    const _confirm = async (data: data) => {
         const { token } = login ? data.login : data.signup
         _saveUserData(token)
-        props.history.push(`/`)
+        history.push(`/`)
     }
 
-    const _saveUserData = token => {
+    const _saveUserData = (token: string) => {
         localStorage.setItem(AUTH_TOKEN, token)
     }
 
@@ -28,6 +48,19 @@ const Login = (props) => {
             return _confirm(data)
         }
     })
+
+    const handleState = (type: keyof typeof INITIAL_STATE, value: string) => {
+        setLoginState({...loginState, [type]: value})
+    }
+
+    const handleInputChange = (type: keyof typeof INITIAL_STATE) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleState(type, e.target.value);
+    }
+
+    const onLoginClick = () => {
+        setLogin(!login)
+    }
+
 
     return (
         <Grid
@@ -39,14 +72,14 @@ const Login = (props) => {
             <Paper>
                 <Box p={4}>
                     <Typography variant="h6">{login ? 'Login' : 'Sign Up'}</Typography>
-                    <Grid container  alignItems="flex-end">
+                    <Grid container alignItems="flex-end">
 
                         <Grid item container direction="column" >
                             {!login && (
                                 <Box p={2}>
                                     <TextField
-                                        value={name}
-                                        onChange={e => setName(e.target.value)}
+                                        value={loginState.name}
+                                        onChange={handleInputChange('name')}
                                         type="name"
                                         placeholder="Your name"
                                     />
@@ -54,16 +87,16 @@ const Login = (props) => {
                             )}
                             <Box p={2}>
                                 <TextField
-                                    value={email}
-                                    onChange={e => setEmail(e.target.value)}
+                                    value={loginState.email}
+                                    onChange={handleInputChange('email')}
                                     type="email"
                                     placeholder="Your email address"
                                 />
                             </Box>
                             <Box p={2}>
                                 <TextField
-                                    value={password}
-                                    onChange={e => setPassword(e.target.value)}
+                                    value={loginState.password}
+                                    onChange={handleInputChange('password')}
                                     type="password"
                                     placeholder="Password"
                                 />
@@ -72,7 +105,7 @@ const Login = (props) => {
                     </Grid>
 
                     <Grid container alignItems="center" direction="column">
-                        <Box p={2} onClick={() => mutation({variables:{ email, password, name }})}>
+                        <Box p={2} onClick={() => mutation({variables:{ ...loginState }})}>
                             {login ?  <Button variant="outlined" color="primary">Login</Button>
                                 : <Button variant="outlined" color="primary">Create Account</Button>
                             }
@@ -80,10 +113,10 @@ const Login = (props) => {
 
                         <Box
                             className="pointer button"
-                            onClick={() => setLogin(!login)}
+                            onClick={onLoginClick}
                         >
-                            {login ?  <Typography variant="outlined" color="primary">need to create an account?</Typography>
-                                : <Typography variant="outlined" color="primary">already have an account?</Typography>
+                            {login ?  <Typography  color="primary">need to create an account?</Typography>
+                                : <Typography  color="primary">already have an account?</Typography>
                             }
                         </Box>
                     </Grid>
@@ -93,4 +126,6 @@ const Login = (props) => {
     )
 }
 
-export default Login
+
+// @ts-ignore
+export default Login;

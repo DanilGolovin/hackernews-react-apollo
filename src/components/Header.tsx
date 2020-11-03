@@ -1,19 +1,19 @@
 import React from 'react'
-import { withRouter } from 'react-router'
+import { useHistory } from 'react-router'
 
-import { AppBar, Toolbar, Typography, IconButton, Button, MenuItem, Menu } from '@material-ui/core'
-import { makeStyles } from '@material-ui/core/styles';
+import { AppBar, Toolbar, Typography, IconButton, Button, MenuItem, Menu, makeStyles, Theme } from '@material-ui/core'
 import MoreIcon from '@material-ui/icons/MoreVert';
 
 import { AUTH_TOKEN } from "../constants";
 import TabLink from "./TabLink";
+import Grid from "@material-ui/core/Grid";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(({ spacing, breakpoints }: Theme) => ({
     width: {
         width: '-webkit-fill-available',
     },
     grow: {
-        flexGrow: '1',
+        flexGrow: 1,
     },
     menuWrapper:{
         display: 'flex',
@@ -21,33 +21,32 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: 'row',
     },
     menu: {
-        maxWidth: theme.containerWidth.maxWidth,
+        maxWidth: '1500px',
     },
     menuButton: {
-        marginRight: theme.spacing(2),
-    },
-    title: {
-
+        marginRight: spacing(2),
     },
     sectionDesktop: {
         display: 'none',
-        [theme.breakpoints.up('md')]: {
+        [breakpoints.up('md')]: {
             display: 'flex',
         },
     },
     sectionMobile: {
         display: 'flex',
-        [theme.breakpoints.up('md')]: {
+        [breakpoints.up('md')]: {
             display: 'none',
         },
     },
 }));
 
 
-const Header = ({history}) => {
+const Header = () => {
+    const history = useHistory();
     const authToken = localStorage.getItem(AUTH_TOKEN)
 
-    const classes = useStyles();
+    const classes = useStyles()
+
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
 
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -56,7 +55,7 @@ const Header = ({history}) => {
         setMobileMoreAnchorEl(null);
     };
 
-    const handleMobileMenuOpen = (event) => {
+    const handleMobileMenuOpen = (event: any) => {
         setMobileMoreAnchorEl(event.currentTarget);
     };
 
@@ -90,11 +89,11 @@ const Header = ({history}) => {
     );
 
     return (
-        <div className={classes.width}>
+        <Grid className={classes.width}>
             <AppBar position="static" className={classes.menuWrapper}>
                 <div className={classes.menu + ' ' + classes.width}>
                     <Toolbar>
-                        <Typography className={classes.title} variant="h6" noWrap>
+                        <Typography variant="h6" noWrap>
                             Hacker News
                         </Typography>
                         <div className={classes.sectionDesktop}>
@@ -137,9 +136,9 @@ const Header = ({history}) => {
                 </div>
             </AppBar>
             {renderMobileMenu}
-        </div>
+        </Grid>
     )
 
 }
 
-export default withRouter(Header)
+export default Header

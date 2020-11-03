@@ -1,9 +1,13 @@
-import React from 'react'
+import React, { FunctionComponent } from 'react'
 import { Link } from "react-router-dom";
 import { Tab } from "@material-ui/core";
 import '../styles/index.css'
 
-const TabLink = ({label, path}) => {
+type TabLinkProps = {
+    label: string,
+    path: string
+}
+const TabLink: FunctionComponent<TabLinkProps> = ({label, path}) => {
     return (
         <Tab label={label}
              className="tab-link"

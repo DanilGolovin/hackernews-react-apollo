@@ -56,7 +56,8 @@ const authLink = setContext((_, { headers }) => {
 
 const client = new ApolloClient({
     link: authLink.concat(httpLink),
-    cache: new InMemoryCache()
+    cache: new InMemoryCache(),
+    connectToDevTools: true
 })
 
 // Material UI styles provider
@@ -70,14 +71,6 @@ const theme = createMuiTheme({
             main: 'rgb(246,246,239)',
         },
     },
-    containerWidth: {
-        maxWidth: '1500px',
-    },
-    flexRowCenter: {
-        display: 'flex',
-        justifyContent: 'center',
-        flexDirection: 'row',
-    },
     spacing: 10,
 });
 
@@ -89,5 +82,4 @@ ReactDOM.render(
             </ThemeProvider>
         </ApolloProvider>
     </BrowserRouter>,
-    document.getElementById('root')
-);
+    document.getElementById('root'));

@@ -1,11 +1,13 @@
 import React from 'react'
 import { Switch, Route, Redirect } from 'react-router-dom'
+
+import makeStyles from "@material-ui/core/styles/makeStyles";
+
 import Header from "./Header";
 import LinkList from "./LinkList";
 import CreateLink from "./CreateLink";
 import Login from "./Login";
 import Search from "./Search";
-import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -19,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: 'column',
     },
     pageWrapper: {
-        maxWidth: theme.containerWidth.maxWidth,
+        maxWidth: '1500px',
         width: '-webkit-fill-available',
         height: '-webkit-fill-available',
     }

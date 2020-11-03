@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { Mutation } from 'react-apollo'
 
 import Paper from "@material-ui/core/Paper";
@@ -10,10 +10,26 @@ import Typography from "@material-ui/core/Typography";
 import { AUTH_TOKEN } from '../constants'
 import { timeDifferenceForDate } from '../utils'
 import { VOTE_MUTATION } from "../queries";
+import type { Link as LinkType } from "../types/link";
+import {useMutation} from "@apollo/client";
 
 
-const Link = (props) => {
+type LinkProps = {
+    index: number,
+    link: LinkType,
+    updateStoreAfterVote?: any,
+}
+
+const Link: FunctionComponent<LinkProps> = ({ index, link, updateStoreAfterVote}) => {
     const authToken = localStorage.getItem(AUTH_TOKEN)
+
+    const [voteMutation] = useMutation(VOTE_MUTATION, {
+            update(store, { data: { vote } }) {
+                updateStoreAfterVote(store, vote, link.id)
+            },
+        }
+    )
+
     return (
         <Box m={1}>
             <Paper variant="outlined" >
@@ -26,38 +42,28 @@ const Link = (props) => {
                 >
                     <Grid >
                         <Box component="span" m={1}>
-                            {props.index + 1}.
+                            {index + 1}.
                         </Box>
                         {authToken && (
-                            <Mutation
-                                mutation={VOTE_MUTATION}
-                                variables={{ linkId: props.link.id }}
-                                update={(store, { data: { vote } }) =>
-                                    props.updateStoreAfterVote(store, vote, props.link.id)
-                                }
-                            >
-                                {voteMutation => (
-                                    <IconButton color="primary" size={"small"}>
-                                        ▲
-                                    </IconButton>
-                                )}
-                            </Mutation>
+                            <IconButton color="primary" size={"small"} onClick={() => voteMutation({variables: { linkId: link.id }})}>
+                                ▲
+                            </IconButton>
                         )}
                     </Grid>
                     <Grid item container direction="column">
                         <Box component="div" m={1}>
                             <Typography variant="h6">
-                                {props.link.description} ({props.link.url})
+                                {link.description} ({link.url})
                             </Typography>
                         </Box>
 
                         <Box component="div" m={1}>
                             <Typography variant="subtitle1">
-                                {props.link.votes.length} votes | by{' '}
-                                {props.link.postedBy
-                                    ? props.link.postedBy.name
+                                {link.votes.length} votes | by{' '}
+                                {link.postedBy
+                                    ? link.postedBy.name
                                     : 'Unknown'}{' '}
-                                {timeDifferenceForDate(props.link.createdAt)}
+                                {timeDifferenceForDate(link.createdAt)}
                             </Typography>
                         </Box>
                     </Grid>
