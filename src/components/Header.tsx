@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import { useHistory } from 'react-router'
 
 import { AppBar, Toolbar, Typography, IconButton, Button, MenuItem, Menu, makeStyles, Theme } from '@material-ui/core'
@@ -7,6 +7,7 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import { AUTH_TOKEN } from "../constants";
 import TabLink from "./TabLink";
 import Grid from "@material-ui/core/Grid";
+import Box from "@material-ui/core/Box";
 
 const useStyles = makeStyles(({ spacing, breakpoints }: Theme) => ({
     width: {
@@ -42,13 +43,12 @@ const useStyles = makeStyles(({ spacing, breakpoints }: Theme) => ({
 
 
 const Header = () => {
-    const history = useHistory();
-    const authToken = localStorage.getItem(AUTH_TOKEN)
-
     const classes = useStyles()
+    const history = useHistory();
+
+    const [isLogout, setIsLogout] = useState(localStorage.getItem(AUTH_TOKEN) ? 'true' : false)
 
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
-
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
     const handleMobileMenuClose = () => {
@@ -80,7 +80,7 @@ const Header = () => {
             <MenuItem>
                 <TabLink label={"search"} path={"/search"} />
             </MenuItem>
-            {authToken && (
+            {isLogout && (
                 <MenuItem>
                     <TabLink label={"create"} path={"/create"} />
                 </MenuItem>
@@ -91,28 +91,29 @@ const Header = () => {
     return (
         <Grid className={classes.width}>
             <AppBar position="static" className={classes.menuWrapper}>
-                <div className={classes.menu + ' ' + classes.width}>
+                <Box className={classes.menu + ' ' + classes.width}>
                     <Toolbar>
                         <Typography variant="h6" noWrap>
                             Hacker News
                         </Typography>
-                        <div className={classes.sectionDesktop}>
+                        <Box className={classes.sectionDesktop}>
                             <TabLink label={"new"} path={"/"} />
                             <TabLink label={"top"} path={"/top"} />
                             <TabLink label={"search"} path={"/search"} />
-                            {authToken && (
+                            {isLogout && (
                                 <MenuItem>
                                     <TabLink label={"create"} path={"/create"} />
                                 </MenuItem>
                             )}
-                        </div>
-                        <div className={classes.grow} />
-                        {authToken ? (
+                        </Box>
+                        <Box className={classes.grow} />
+                        {localStorage.getItem(AUTH_TOKEN)  ? (
                             <Button
                                 className="ml1 pointer black"
                                 onClick={() => {
                                     localStorage.removeItem(AUTH_TOKEN)
                                     history.push(`/`)
+                                    setIsLogout(!isLogout)
                                 }}
                             >
                                 logout
@@ -120,7 +121,7 @@ const Header = () => {
                         ) : (
                             <TabLink label={"login"} path={"/login"} />
                         )}
-                        <div className={classes.sectionMobile}>
+                        <Box className={classes.sectionMobile}>
                             <IconButton
                                 aria-label="show more"
                                 aria-controls={mobileMenuId}
@@ -130,10 +131,9 @@ const Header = () => {
                             >
                                 <MoreIcon />
                             </IconButton>
-                        </div>
+                        </Box>
                     </Toolbar>
-
-                </div>
+                </Box>
             </AppBar>
             {renderMobileMenu}
         </Grid>

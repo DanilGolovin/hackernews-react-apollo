@@ -1,38 +1,38 @@
-import React, { FunctionComponent } from 'react';
-import { Mutation } from 'react-apollo'
-
+import React, {FunctionComponent} from 'react';
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 
-import { AUTH_TOKEN } from '../constants'
-import { timeDifferenceForDate } from '../utils'
-import { VOTE_MUTATION } from "../queries";
-import type { Link as LinkType } from "../types/link";
-import {useMutation} from "@apollo/client";
+import {AUTH_TOKEN} from '../constants'
+import {timeDifferenceForDate} from '../utils'
+import {VOTE_MUTATION} from "../queries";
+import type {Link as LinkType} from "../types/link";
+import type {Vote as VoteType} from "../types/link";
+import {useMutation} from "react-apollo";
+import {DataProxy} from "apollo-cache";
 
 
 type LinkProps = {
     index: number,
     link: LinkType,
-    updateStoreAfterVote?: any,
+    updateStoreAfterVote?: (store: DataProxy, createVote: VoteType, linkId: string) => void,
 }
 
-const Link: FunctionComponent<LinkProps> = ({ index, link, updateStoreAfterVote}) => {
+const Link: FunctionComponent<LinkProps> = ({index, link, updateStoreAfterVote}) => {
     const authToken = localStorage.getItem(AUTH_TOKEN)
 
     const [voteMutation] = useMutation(VOTE_MUTATION, {
-            update(store, { data: { vote } }) {
-                updateStoreAfterVote(store, vote, link.id)
+            update(store, {data: {vote}}) {
+                if (updateStoreAfterVote) updateStoreAfterVote(store, vote, link.id)
             },
         }
     )
 
     return (
         <Box m={1}>
-            <Paper variant="outlined" >
+            <Paper variant="outlined">
                 <Grid
                     container
                     direction="row"
@@ -40,12 +40,13 @@ const Link: FunctionComponent<LinkProps> = ({ index, link, updateStoreAfterVote}
                     alignItems="center"
                     wrap="nowrap"
                 >
-                    <Grid >
+                    <Grid>
                         <Box component="span" m={1}>
                             {index + 1}.
                         </Box>
                         {authToken && (
-                            <IconButton color="primary" size={"small"} onClick={() => voteMutation({variables: { linkId: link.id }})}>
+                            <IconButton color="primary" size={"small"}
+                                        onClick={() => voteMutation({variables: {linkId: link.id}})}>
                                 ▲
                             </IconButton>
                         )}

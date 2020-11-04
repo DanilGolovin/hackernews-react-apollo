@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useHistory } from "react-router";
 
-import { useMutation } from '@apollo/react-hooks';
+import { useMutation } from 'react-apollo';
 
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";

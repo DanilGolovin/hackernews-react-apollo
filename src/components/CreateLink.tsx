@@ -5,7 +5,7 @@ import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import { POST_MUTATION, FEED_QUERY } from "../queries";
-import { useMutation } from '@apollo/react-hooks';
+import { useMutation } from 'react-apollo';
 import { useHistory } from "react-router";
 
 import { Link } from "../types/link";
